@@ -20,7 +20,6 @@ class Station(object):
 		self.stationInformation = None
 		self.data = None
 		self.getStationInfo()
-		self.getData()
 
 	def getStationInfo(self):
 		if self.dataURL == None:
