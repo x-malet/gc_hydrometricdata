@@ -11,8 +11,8 @@ import requests
 from abc import abstractmethod, abstractproperty
 from re import search, split
 
-
-
+HISTORICAL_STATION_DATA = "https://eau.ec.gc.ca/report/historical_e.html"
+REAL_TIME_STATION_DATA_URL = "https://eau.ec.gc.ca/report/real_time_e.html"
 
 class Station(object):
     def __init__(self, stationNumber, dataURL):

@@ -5,11 +5,11 @@ __date__ = '2017-01-23'
 __description__ = " "
 __version__ = '1.0'
 
-from web_crawler.station import Station
+from web_crawler.station import Station, HistoricalStation,RealTimeStation
 from web_crawler.station_list import *
 
-HISTORICAL_STATION_DATA = "https://eau.ec.gc.ca/report/historical_e.html"
-REAL_TIME_STATION_DATA_URL = "https://eau.ec.gc.ca/report/real_time_e.html"
+
+
 
 class HydrometricDataInterface(object):
     def __init__(self):
@@ -60,48 +60,63 @@ class HydrometricDataInterface(object):
         realTimeStation = [station for station in self.realTimeStationList if station not in self.historicStationList]
         return historicStation + realTimeStation
 
-    def getStationData(self, stationNumber) -> dict:
+    def getStation(self, stationNumber) -> dict:
         if stationNumber not in self._stationData.keys():
             self._extractStationData(stationNumber)
 
         return self._stationData[stationNumber]
 
     def _getDataTypeForStation(self, stationNumber, dataType) -> Station:
-        if dataType in self.getStationData(stationNumber).keys():
-            return self.getStationData(stationNumber)[dataType]
+        if dataType in self.getStation(stationNumber).keys():
+            return self.getStation(stationNumber)[dataType]
         else:
             raise KeyError("Station doesn't have the requested data")
 
-    def getHistoricalDataForStation(self, stationNumber) -> Station:
+    def getHistoricalStation(self, stationNumber) -> Station:
         return self._getDataTypeForStation(stationNumber, HISTORICAL_DATA_KEY)
 
-    def getRealTimeDataForStation(self, stationNumber) -> Station:
+    def getRealTimeStation(self, stationNumber) -> Station:
         return self._getDataTypeForStation(stationNumber, REAL_TIME_DATA_KEY)
 
     def getStationInfo(self, stationNumber) -> dict:
         if self.isStationPresent(stationNumber):
             if stationNumber in self.historicStationList:
-                return self.getHistoricalDataForStation(stationNumber).stationInformation
+                return self.getHistoricalStation(stationNumber).stationInformation
             else:
-                return self.getRealTimeDataForStation(stationNumber).stationInformation
+                return self.getRealTimeStation(stationNumber).stationInformation
         else:
             raise AttributeError('Station not in the station list')
 
     def getStationCoordinates(self, stationNumber) -> tuple:
         if self.isStationPresent(stationNumber):
             if stationNumber in self.historicStationList:
-                return self.getHistoricalDataForStation(stationNumber).coordinates
+                return self.getHistoricalStation(stationNumber).coordinates
             else:
-                return self.getRealTimeDataForStation(stationNumber).coordinates
+                return self.getRealTimeStation(stationNumber).coordinates
         else:
             raise AttributeError('Station not in the station list')
 
 
 if __name__ == '__main__':
-    from web_crawler.station import *
 
     webStation = HydrometricDataInterface()
     webStation.getStationsForProvince('Quebec')
 
     for station in webStation.historicStationList.items():
         print(station)
+
+    stationName = "01BF004"
+    print("=" * 15)
+    print("Example of how to use the interface")
+    print("=" * 15)
+    print("getting station info")
+    print(webStation.getStationInfo(stationName))
+    print("=" * 15)
+    print("getting station coordinates")
+    print("=" * 15)
+    print(webStation.getStationCoordinates(stationName))
+    print("=" * 15)
+    print("getting station data")
+    print("=" * 15)
+    webStation.getHistoricalStation(stationName).getData()
+    print(webStation.getHistoricalStation(stationName).data)
