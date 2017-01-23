@@ -10,8 +10,8 @@ from urllib import request
 
 import bs4, datetime, requests
 
-STATION_LIST_BY_PROVINCE = "https://eau.ec.gc.ca/search/real_time_results_e.html"
-PROVINCE_LIST_URL = "https://eau.ec.gc.ca/search/real_time_e.html"
+PROVINCE_LIST = "https://eau.ec.gc.ca/search/real_time_e.html"
+REAL_TIME_STATION_LIST = "https://eau.ec.gc.ca/search/real_time_results_e.html"
 HISTORICAL_STATION_LIST = "https://eau.ec.gc.ca/search/historical_results_e.html"
 
 HISTORICAL_DATA_KEY = 'historic_data'
@@ -29,7 +29,7 @@ class StationList(metaclass=ABCMeta):
         self._getProvinceList()
 
     def _getProvinceList(self):
-        provinceInWebSite = bs4.BeautifulSoup(request.urlopen(PROVINCE_LIST_URL), "html.parser").find(
+        provinceInWebSite = bs4.BeautifulSoup(request.urlopen(PROVINCE_LIST), "html.parser").find(
             id='province')
         self._webSiteContent['province_list'] = {}
         for values in provinceInWebSite.contents:
@@ -90,7 +90,7 @@ class HistoricalStationList(StationList):
 
 class RealTimeStationList(StationList):
     def __init__(self, province=None):
-        super().__init__(province, STATION_LIST_BY_PROVINCE)
+        super().__init__(province, REAL_TIME_STATION_LIST)
         self.dict_url = {
             'search_type': 'province',
             'province': self.province_list[self.province],
