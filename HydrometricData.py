@@ -101,10 +101,15 @@ class HydrometricDataInterface(object):
 if __name__ == '__main__':
 
     webStation = HydrometricDataInterface()
-    webStation.getStationsForProvince('Quebec')
+    webStation.getStationsForProvince('New Brunswick')
 
     for station in webStation.historicStationList.items():
-        print(station)
+        for name in ['pollet','apoha', 'petitco']:
+            if  name in station[1].lower():
+                print("="*25)
+                print(station)
+                print(webStation.getStationInfo(station[0]))
+                break
 
     stationName = "01BF004"
     print("=" * 15)
