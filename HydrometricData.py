@@ -5,7 +5,8 @@ __date__ = '2017-01-23'
 __description__ = " "
 __version__ = '1.0'
 
-from web_crawler.station import Station, HistoricalStation,RealTimeStation
+from web_crawler.abstractstation import AbstractHydrometricStation
+from web_crawler.hydrometric_station import HistoricalHydrometricStation, RealTimeHydrometricStation
 from web_crawler.station_list import *
 
 
@@ -18,25 +19,25 @@ class HydrometricDataInterface(object):
         self._stationData = {}
 
     def getStationsForProvince(self, provinceName: str):
-        self._historic_station = HistoricalStationList(provinceName)
-        self._real_time_station = RealTimeStationList(provinceName)
+        self._historic_station = HistoricalHydrometricStationList(provinceName)
+        self._real_time_station = RealTimeHydrometricStationList(provinceName)
 
     def _extractStationData(self, stationNumber: str):
         if self.isStationPresent(stationNumber):
             self._stationData[stationNumber] = {}
             if stationNumber in self.getStationInBoth():
                 print('station have historic and real-time data')
-                self._stationData[stationNumber][HISTORICAL_DATA_KEY] = HistoricalStation(stationNumber)
-                self._stationData[stationNumber][REAL_TIME_DATA_KEY] = RealTimeStation(stationNumber)
+                self._stationData[stationNumber][HISTORICAL_DATA_KEY] = HistoricalHydrometricStation(stationNumber)
+                self._stationData[stationNumber][REAL_TIME_DATA_KEY] = RealTimeHydrometricStation(stationNumber)
             else:
                 if stationNumber in self.historicStationList:
                     print('station have historic data only')
 
-                    self._stationData[stationNumber][HISTORICAL_DATA_KEY] = HistoricalStation(stationNumber)
+                    self._stationData[stationNumber][HISTORICAL_DATA_KEY] = HistoricalHydrometricStation(stationNumber)
                 elif stationNumber in self.realTimeStationList:
                     print('station have real-time data only')
 
-                    self._stationData[stationNumber][REAL_TIME_DATA_KEY] = RealTimeStation(stationNumber)
+                    self._stationData[stationNumber][REAL_TIME_DATA_KEY] = RealTimeHydrometricStation(stationNumber)
         else:
             raise AttributeError('Station not in the station list')
 
@@ -66,16 +67,16 @@ class HydrometricDataInterface(object):
 
         return self._stationData[stationNumber]
 
-    def _getDataTypeForStation(self, stationNumber, dataType) -> Station:
+    def _getDataTypeForStation(self, stationNumber, dataType) -> AbstractHydrometricStation:
         if dataType in self.getStation(stationNumber).keys():
             return self.getStation(stationNumber)[dataType]
         else:
             raise KeyError("Station doesn't have the requested data")
 
-    def getHistoricalStation(self, stationNumber) -> Station:
+    def getHistoricalStation(self, stationNumber) -> AbstractHydrometricStation:
         return self._getDataTypeForStation(stationNumber, HISTORICAL_DATA_KEY)
 
-    def getRealTimeStation(self, stationNumber) -> Station:
+    def getRealTimeStation(self, stationNumber) -> AbstractHydrometricStation:
         return self._getDataTypeForStation(stationNumber, REAL_TIME_DATA_KEY)
 
     def getStationInfo(self, stationNumber) -> dict:
@@ -112,11 +113,11 @@ if __name__ == '__main__':
     print("getting station info")
     print(webStation.getStationInfo(stationName))
     print("=" * 15)
-    print("getting station coordinates")
-    print("=" * 15)
-    print(webStation.getStationCoordinates(stationName))
-    print("=" * 15)
-    print("getting station data")
-    print("=" * 15)
-    webStation.getHistoricalStation(stationName).getData()
-    print(webStation.getHistoricalStation(stationName).data)
+    # print("getting station coordinates")
+    # print("=" * 15)
+    # print(webStation.getStationCoordinates(stationName))
+    # print("=" * 15)
+    # print("getting station data")
+    # print("=" * 15)
+    # webStation.getHistoricalStation(stationName).getData()
+    # print(webStation.getHistoricalStation(stationName).data)
