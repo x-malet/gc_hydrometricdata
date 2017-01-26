@@ -33,3 +33,21 @@ lstProvince:
 timeframe:2
 Year:2007
 """
+
+r1 = requests.get("http://climate.weather.gc.ca/climate_data/daily_data_e.html?&StationID=5309&Year=1973")
+bsFile = bs4.BeautifulSoup(r1.text, 'html.parser')
+for data in bsFile.find('select', {'id': 'Year1'}):
+    if isinstance(data, bs4.element.Tag):
+        print(data['value'])
+
+        r = requests.get(
+            "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=5309&timeframe=2&Year={}".format(
+                data['value']))
+        for line in r.text.split('\n'):
+            if line.replace('"', '').split(",")[0] == 'Date/Time':
+                print("=" * 15)
+                print(len(line.replace('"', '').split(",")))
+                print("=" * 15)
+            else:
+                print(len(line.replace('"', '').split(",")))
+            print(line.replace('"', '').split(","))
