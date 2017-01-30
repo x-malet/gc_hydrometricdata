@@ -19,9 +19,8 @@ HISTORICAL_STATION_LIST_URL = "https://eau.ec.gc.ca/search/historical_results_e.
 HISTORICAL_DATA_KEY = 'historic_data'
 REAL_TIME_DATA_KEY = 'real_time_data'
 
-WEATHER_STATION_LIST_URL = "http://climate.weather.gc.ca/historical_data/search_historic_data_stations_e.html"
+WEATHER_STATION_LIST_URL =      "http://climate.weather.gc.ca/historical_data/search_historic_data_stations_e.html"
 WEATHER_STATION_PROVINCE_LIST = "http://climate.weather.gc.ca/historical_data/search_historic_data_e.html"
-
 
 class StationList(metaclass=ABCMeta):
     def __init__(self, province=None, mainURL=''):
@@ -109,6 +108,8 @@ class WeatherStationList(StationList):
     def __init__(self, province=None):
         super().__init__(province, WEATHER_STATION_LIST_URL)
 
+        self.getStationList()
+
     def _getProvinceList(self):
         r = requests.get(WEATHER_STATION_PROVINCE_LIST)
         print(r.url)
@@ -144,10 +145,10 @@ class WeatherStationList(StationList):
             'selRowPerPage': 100
         }
 
-    def makeRequestDictForProvinceSearch(self, provinceName):
+    def makeRequestDictForProvinceSearch(self, startRow = '001'):
 
         self.dict_url = {
-            'searchType': "stnProx",
+            'searchType': "stnProv",
             'timeframe': '1',
             'lstProvince': self.province_list[self.province],
             'optLimit': "yearRange",
@@ -155,20 +156,39 @@ class WeatherStationList(StationList):
             'EndYear': str(datetime.datetime.now().year),
             'Year': str(datetime.datetime.now().year),
             'Month': str(datetime.datetime.now().month),
-            'Day': str(datetime.datetime.now().day)
+            'Day': str(datetime.datetime.now().day),
+            'selRowPerPage':100,
+            'startRow':startRow
         }
 
     def getStationList(self):
-        pass
+        self._webSiteContent['station_list'] = {}
+        self.makeRequestDictForProvinceSearch()
+        r = requests.get(WEATHER_STATION_LIST_URL,
+                         params=self.dict_url)
+        bsFile = bs4.BeautifulSoup(r.text, 'html.parser')
+        number_result = bsFile.find('h1').find_next('p').contents[0].split(' ')[0]
+        print("Total number of results : {}".format(number_result))
+        for i in range((int(number_result) // 100) + 1):
+            print('Getting page '+ str(i+1))
+            self.makeRequestDictForProvinceSearch(startRow=str(i) + '01')
+            r1 = requests.get(WEATHER_STATION_LIST_URL,
+                              params=self.dict_url)
+            bsFile = bs4.BeautifulSoup(r1.text, 'html.parser')
+            item = bsFile.find('form', {'action': '/climate_data/interform_e.html'})
+            while item != None:
+                if item.find('input', {'name': 'StationID'})['value'] not in \
+                        self._webSiteContent['station_list'].keys() and \
+                    [int(v['value'])
+                     for v in item.find('select', {'name': 'timeframe'}).find_all('option')
+                     if int(v['value']) in [1, 2]] != []:
+                        stationID = item.find('input', {'name': 'StationID'})['value']
+                        self._webSiteContent['station_list'][stationID] = {}
+
+                item = item.find_next('form', {'action': '/climate_data/interform_e.html'})
 
 
 if __name__ == '__main__':
-    # wstl = WeatherStationList('Quebec')
-    # print(wstl.province_list)
-    r = requests.get("http://climate.weather.gc.ca/historical_data/search_historic_data_stations_e.html?searchType=stnProv&lstProvince=QC&StartYear=1840&EndYear=2017&Year=2017&Month=1&Day=24")
-    bsFile = bs4.BeautifulSoup(r.text, 'html.parser')
-    for tag in bsFile.find('form',{'action':'/climate_data/interform_e.html'}).find_all('input'):
-        # print(tag)
-        if 'name' in tag.attrs and tag['name'] == 'StationID':
-            print(tag, tag['value'])
+    wst = WeatherStationList('Quebec')
+    print(len(wst.station_list))
 

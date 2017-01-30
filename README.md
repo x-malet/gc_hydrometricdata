@@ -3,6 +3,12 @@ GC_HydrometricData
 This project intend to provide an interface that can be used to extract the
 data from the web site [https://eau.ec.gc.ca/](https://eau.ec.gc.ca/).
  
+ Run with
+ --------
+ * python 2.7
+ * python 3.4
+ * python 3.6
+ 
  Dependency
  ----------
 * [requests](https://pypi.python.org/pypi/requests)
