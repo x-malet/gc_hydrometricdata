@@ -9,6 +9,8 @@ from web_crawler.abstractstation import AbstractHydrometricStation
 from web_crawler.hydrometric_station import HistoricalHydrometricStation, RealTimeHydrometricStation
 from web_crawler.station_list import *
 
+import requests.packages.urllib3
+requests.packages.urllib3.disable_warnings()
 
 
 

@@ -11,6 +11,8 @@ import requests
 from re import search, split
 from web_crawler.abstractstation import AbstractWeatherStation
 
+# WIP
+
 WEATHER_STATION_DATA_URL = "http://climate.weather.gc.ca/climate_data/daily_data_e.html"
 
 
